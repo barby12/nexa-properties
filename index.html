@@ -10,54 +10,23 @@
     <div class="bg-indigo-900 text-white p-6 text-center font-bold text-2xl shadow-lg uppercase tracking-widest">Nexa Real Estate</div>
     
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" class="w-full h-56 object-cover">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800">Modern Luxury Villa</h2>
+                <p class="text-indigo-600 font-extrabold text-xl mt-2">PKR 4.5 Crore</p>
+                <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-4 rounded-2xl mt-5 font-bold text-lg shadow-lg">WhatsApp Now</a>
+            </div>
         </div>
 
-    <script>
-        // آپ کا ڈیٹا یہاں مستقل محفوظ کر دیا گیا ہے تاکہ شیٹ خراب ہو تب بھی یہ نظر آئے
-        const backupData = [
-            { title: "Modern Luxury Villa", price: "PKR 4.5 Crore", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" },
-            { title: "Luxury Apartment", price: "PKR 6.5 Crore", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750" },
-            { title: "Test Villa", price: "PKR 100", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9" }
-        ];
-
-        function displayProperties(properties) {
-            let html = '';
-            properties.forEach(p => {
-                html += `
-                <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
-                    <img src="${p.img}" class="w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h2 class="text-2xl font-bold text-gray-800">${p.title}</h2>
-                        <p class="text-indigo-600 font-extrabold text-xl mt-2">${p.price}</p>
-                        <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-4 rounded-2xl mt-5 font-bold text-lg">WhatsApp Now</a>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('listing').innerHTML = html;
-        }
-
-        async function start() {
-            const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
-            try {
-                const res = await fetch(url);
-                const csv = await res.text();
-                const rows = csv.split(/\r?\n/).slice(1);
-                let sheetData = [];
-
-                rows.forEach(row => {
-                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
-                    if (cols[0] && cols[0].length > 2 && cols[0].length < 50) {
-                        sheetData.push({ title: cols[0], price: cols[1], img: cols[2] || backupData[0].img });
-                    }
-                });
-
-                // اگر شیٹ سے ڈیٹا مل گیا تو وہ دکھائیں، ورنہ بیک اپ دکھائیں
-                displayProperties(sheetData.length > 0 ? sheetData : backupData);
-            } catch (e) {
-                displayProperties(backupData);
-            }
-        }
-        start();
-    </script>
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750" class="w-full h-56 object-cover">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800">Luxury Apartment</h2>
+                <p class="text-indigo-600 font-extrabold text-xl mt-2">PKR 6.5 Crore</p>
+                <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-4 rounded-2xl mt-5 font-bold text-lg shadow-lg">WhatsApp Now</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
