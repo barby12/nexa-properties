@@ -3,58 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexa Properties</title>
+    <title>Nexa Real Estate</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
     <div class="bg-indigo-900 text-white p-6 text-center font-bold text-2xl shadow-lg">NEXA REAL ESTATE</div>
-
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6">
-        <p class="text-center text-gray-500 py-20 font-medium">Loading your beautiful properties...</p>
+        <p class="text-center text-gray-500 py-20 font-medium">Connecting to Live Feed...</p>
     </div>
 
     <script>
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
+        // لنک میں وقت کا اضافہ تاکہ ہر بار بالکل تازہ ڈیٹا ملے
+        const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&cache=" + Math.random();
 
-        async function getListings() {
+        async function updatePage() {
             try {
-                const res = await fetch(sheetUrl);
-                const csv = await res.text();
+                const response = await fetch(url);
+                const text = await response.text();
                 
-                // ڈیٹا کو لائنوں میں توڑنا
-                const lines = csv.split(/\r?\n/);
-                let cards = '';
+                // ڈیٹا کو لائنوں میں تقسیم کرنا
+                const rows = text.split(/\r?\n/).filter(r => r.length > 5);
+                let content = '';
 
-                for (let i = 1; i < lines.length; i++) {
-                    // یہ حصہ ہر کالم کو صحیح طریقے سے الگ کرے گا
-                    const parts = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                // i=1 سے شروع کریں تاکہ ہیڈنگز (Title/Price) نظر نہ آئیں
+                for(let i = 1; i < rows.length; i++) {
+                    const columns = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     
-                    if (parts.length >= 2) {
-                        const title = parts[0].replace(/"/g, "").trim();
-                        const price = parts[1] ? parts[1].replace(/"/g, "").trim() : "Contact";
-                        const img = parts[2] ? parts[2].replace(/"/g, "").trim() : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c";
+                    // ڈیٹا کو ہر قسم کے نشانات سے پاک کرنا
+                    const title = columns[0] ? columns[0].replace(/["']/g, "").trim() : "";
+                    const price = columns[1] ? columns[1].replace(/["']/g, "").trim() : "";
+                    const image = columns[2] ? columns[2].replace(/["']/g, "").trim() : "";
 
-                        // اگر ٹائٹل موجود ہے تو کارڈ بنائیں
-                        if (title && title.length > 2) {
-                            cards += `
-                            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
-                                <img src="${img}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
-                                <div class="p-6">
-                                    <h2 class="text-2xl font-bold text-gray-800">${title}</h2>
-                                    <p class="text-indigo-600 font-extrabold text-xl mt-2">${price}</p>
-                                    <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-4 rounded-2xl mt-5 font-bold text-lg shadow-lg">WhatsApp Now</a>
-                                </div>
-                            </div>`;
-                        }
+                    if(title) {
+                        content += `
+                        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+                            <img src="${image}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
+                            <div class="p-6">
+                                <h2 class="text-2xl font-bold text-gray-800">${title}</h2>
+                                <p class="text-indigo-600 font-extrabold text-xl mt-2">${price}</p>
+                                <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-4 rounded-2xl mt-5 font-bold text-lg shadow-lg">WhatsApp Now</a>
+                            </div>
+                        </div>`;
                     }
                 }
-
-                document.getElementById('listing').innerHTML = cards || '<p class="text-center py-20 text-gray-500">Checking your Sheet for updates...</p>';
-            } catch (err) {
-                document.getElementById('listing').innerHTML = '<p class="text-center text-red-500">Connection error. Please refresh.</p>';
+                document.getElementById('listing').innerHTML = content || '<p class="text-center py-20">No properties found. Check your sheet!</p>';
+            } catch(e) {
+                document.getElementById('listing').innerHTML = '<p class="text-center text-red-500 py-20">Network Error. Refreshing...</p>';
             }
         }
-        getListings();
+        updatePage();
     </script>
 </body>
 </html>
