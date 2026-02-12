@@ -16,31 +16,38 @@
     </div>
 
     <script>
-        const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?output=csv";
+        // آپ کی گوگل شیٹ کا بالکل درست لنک
+        const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv";
 
         fetch(url)
             .then(res => res.text())
             .then(data => {
-                const rows = data.split('\n').slice(1);
+                const rows = data.split('\n').filter(row => row.trim() !== "");
                 let html = '';
-                rows.forEach(row => {
-                    const cols = row.split(',');
+                
+                // پہلی لائن (Header) کو چھوڑ کر باقی ڈیٹا دکھانا
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i].split(',');
                     if(cols[0]) {
+                        const title = cols[0].replace(/"/g, "").trim();
+                        const price = cols[1] ? cols[1].replace(/"/g, "").trim() : "";
+                        const img = cols[2] ? cols[2].trim() : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c";
+
                         html += `
-                        <div class="bg-white rounded-2xl shadow-md mb-6 overflow-hidden border">
-                            <img src="${cols[2] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-48 object-cover">
+                        <div class="bg-white rounded-2xl shadow-md mb-6 overflow-hidden border border-gray-200">
+                            <img src="${img}" class="w-full h-48 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
                             <div class="p-4">
-                                <h2 class="text-xl font-bold">${cols[0]}</h2>
-                                <p class="text-indigo-600 text-xl font-bold mt-1">${cols[1]}</p>
-                                <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-3 rounded-lg mt-4 font-bold">WhatsApp Now</a>
+                                <h2 class="text-xl font-bold text-gray-800">${title}</h2>
+                                <p class="text-indigo-600 text-xl font-bold mt-1">${price}</p>
+                                <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-3 rounded-xl mt-4 font-bold shadow-sm hover:bg-green-600 transition-colors">WhatsApp Now</a>
                             </div>
                         </div>`;
                     }
-                });
-                document.getElementById('listing').innerHTML = html || '<p class="text-center">No properties found. Check your sheet data.</p>';
+                }
+                document.getElementById('listing').innerHTML = html || '<p class="text-center">No data found in Sheet.</p>';
             })
             .catch(err => {
-                document.getElementById('listing').innerHTML = '<p class="text-red-500 text-center font-bold">Error connecting to Google Sheets.</p>';
+                document.getElementById('listing').innerHTML = '<p class="text-red-500 text-center font-bold">Connection Error. Please refresh.</p>';
             });
     </script>
 </body>
