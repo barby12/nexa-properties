@@ -3,74 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexa Real Estate</title>
+    <title>Nexa Real Estate - Live</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .property-card { transition: transform 0.2s; }
-        .property-card:hover { transform: translateY(-5px); }
-    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="bg-indigo-900 text-white p-6 text-center shadow-lg sticky top-0 z-50">
+<body class="bg-gray-50">
+    <div class="bg-indigo-900 text-white p-6 text-center shadow-md">
         <h1 class="text-2xl font-bold tracking-widest uppercase">Nexa Real Estate</h1>
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4">
-        <div class="flex justify-center items-center h-64">
-            <p class="text-gray-500 animate-pulse font-medium">Cleaning & Loading Data...</p>
+        <div class="text-center py-20">
+            <p class="text-gray-500 animate-bounce">Fetching Fresh Data...</p>
         </div>
     </div>
 
     <script>
-        const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv";
+        // لنک میں ٹائم اسٹیمپ (Timestamp) شامل کیا گیا ہے تاکہ ڈیٹا ہمیشہ تازہ رہے
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + new Date().getTime();
 
-        // یہ فنکشن گندے کوڈ کو صاف کرے گا
-        function cleanText(text) {
-            if (!text) return "";
-            return text.replace(/<[^>]*>?/gm, '') // HTML ٹیگز ختم کریں
-                       .replace(/function[\s\S]*?}/g, '') // جاوا اسکرپٹ فنکشنز مٹائیں
-                       .replace(/[{}()]/g, '') // بریکٹس مٹائیں
-                       .replace(/"/g, "").trim(); // کومے ختم کریں
-        }
-
-        async function fetchProperties() {
+        async function loadData() {
             try {
-                const response = await fetch(url);
-                const csvData = await response.text();
-                const rows = csvData.split(/\r?\n/).filter(row => row.trim() !== "");
+                const response = await fetch(sheetUrl);
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).slice(1); // پہلی ہیڈر لائن چھوڑ دیں
+                
                 let html = '';
-
-                for (let i = 1; i < rows.length; i++) {
-                    const cols = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    
-                    if (cols.length >= 1) {
-                        const title = cleanText(cols[0]);
-                        const price = cols[1] ? cleanText(cols[1]) : "";
+                rows.forEach(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (cols.length >= 2) {
+                        // ڈیٹا کو صاف کرنے کا طریقہ
+                        const title = cols[0].replace(/"/g, "").replace(/function[\s\S]*?}/g, "").trim();
+                        const price = cols[1] ? cols[1].replace(/"/g, "").trim() : "Contact";
                         const img = (cols[2] && cols[2].includes('http')) ? cols[2].replace(/"/g, "").trim() : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c";
 
-                        // اگر ٹائٹل میں ابھی بھی بہت لمبا کوڈ ہو تو اسے نہ دکھائیں
-                        if (title.length > 0 && title.length < 100) {
+                        // صرف وہی دکھائیں جو واقعی نام ہے (کوڈ نہیں)
+                        if (title.length > 2 && title.length < 50) {
                             html += `
-                            <div class="bg-white rounded-3xl shadow-md mb-8 overflow-hidden border border-gray-200 property-card">
-                                <div class="relative">
-                                    <img src="${img}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
-                                    <div class="absolute top-4 left-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-bold">New</div>
-                                </div>
+                            <div class="bg-white rounded-2xl shadow-lg mb-6 overflow-hidden border border-gray-100">
+                                <img src="${img}" class="w-full h-52 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
                                 <div class="p-5">
-                                    <h2 class="text-2xl font-extrabold text-gray-800 mb-1">${title}</h2>
-                                    <p class="text-indigo-600 text-xl font-bold mb-4">${price}</p>
-                                    <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-3 rounded-xl font-bold shadow-sm">WhatsApp Now</a>
+                                    <h2 class="text-xl font-extrabold text-gray-800">${title}</h2>
+                                    <p class="text-indigo-600 font-bold text-lg mt-1">${price}</p>
+                                    <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-3 rounded-xl mt-4 font-bold shadow-md hover:bg-green-600 transition">
+                                        WhatsApp Now
+                                    </a>
                                 </div>
                             </div>`;
                         }
                     }
-                }
-                document.getElementById('listing').innerHTML = html || '<p class="text-center text-gray-500 mt-10">No clean data found.</p>';
-            } catch (error) {
-                document.getElementById('listing').innerHTML = '<p class="text-center text-red-500">Error loading data.</p>';
+                });
+
+                document.getElementById('listing').innerHTML = html || '<div class="text-center p-10"><p class="text-gray-500">Please type property names in Row 2 and 3 of your Sheet.</p></div>';
+            } catch (e) {
+                document.getElementById('listing').innerHTML = '<p class="text-center text-red-500">Error: Please refresh.</p>';
             }
         }
-        fetchProperties();
+
+        loadData();
     </script>
 </body>
 </html>
