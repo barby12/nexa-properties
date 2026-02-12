@@ -17,60 +17,59 @@
 
     <div id="listing" class="max-w-md mx-auto p-4">
         <div class="flex justify-center items-center h-64">
-            <p class="text-gray-500 animate-pulse font-medium">Connecting to Google Sheets...</p>
+            <p class="text-gray-500 animate-pulse font-medium">Cleaning & Loading Data...</p>
         </div>
     </div>
 
     <script>
-        // آپ کی گوگل شیٹ کا حتمی لنک
         const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv";
+
+        // یہ فنکشن گندے کوڈ کو صاف کرے گا
+        function cleanText(text) {
+            if (!text) return "";
+            return text.replace(/<[^>]*>?/gm, '') // HTML ٹیگز ختم کریں
+                       .replace(/function[\s\S]*?}/g, '') // جاوا اسکرپٹ فنکشنز مٹائیں
+                       .replace(/[{}()]/g, '') // بریکٹس مٹائیں
+                       .replace(/"/g, "").trim(); // کومے ختم کریں
+        }
 
         async function fetchProperties() {
             try {
                 const response = await fetch(url);
                 const csvData = await response.text();
-                
-                // ڈیٹا کو لائنوں میں تقسیم کرنا
                 const rows = csvData.split(/\r?\n/).filter(row => row.trim() !== "");
                 let html = '';
 
-                // i=1 کا مطلب ہے پہلی ہیڈنگ والی لائن کو چھوڑ کر ڈیٹا شروع کرنا
                 for (let i = 1; i < rows.length; i++) {
                     const cols = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     
-                    if (cols.length >= 2) {
-                        const title = cols[0].replace(/"/g, "").trim();
-                        const price = cols[1] ? cols[1].replace(/"/g, "").trim() : "Contact for Price";
+                    if (cols.length >= 1) {
+                        const title = cleanText(cols[0]);
+                        const price = cols[1] ? cleanText(cols[1]) : "";
                         const img = (cols[2] && cols[2].includes('http')) ? cols[2].replace(/"/g, "").trim() : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c";
 
-                        html += `
-                        <div class="bg-white rounded-3xl shadow-md mb-8 overflow-hidden border border-gray-200 property-card">
-                            <div class="relative">
-                                <img src="${img}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
-                                <div class="absolute top-4 left-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-bold">New</div>
-                            </div>
-                            <div class="p-5">
-                                <h2 class="text-2xl font-extrabold text-gray-800 mb-1">${title}</h2>
-                                <p class="text-indigo-600 text-xl font-bold mb-4">${price}</p>
-                                <div class="flex gap-2">
-                                    <a href="https://wa.me/923082820224" class="flex-1 bg-green-500 text-white text-center py-3 rounded-xl font-bold shadow-sm hover:bg-green-600 transition-colors">
-                                        WhatsApp Now
-                                    </a>
+                        // اگر ٹائٹل میں ابھی بھی بہت لمبا کوڈ ہو تو اسے نہ دکھائیں
+                        if (title.length > 0 && title.length < 100) {
+                            html += `
+                            <div class="bg-white rounded-3xl shadow-md mb-8 overflow-hidden border border-gray-200 property-card">
+                                <div class="relative">
+                                    <img src="${img}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
+                                    <div class="absolute top-4 left-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-bold">New</div>
                                 </div>
-                            </div>
-                        </div>`;
+                                <div class="p-5">
+                                    <h2 class="text-2xl font-extrabold text-gray-800 mb-1">${title}</h2>
+                                    <p class="text-indigo-600 text-xl font-bold mb-4">${price}</p>
+                                    <a href="https://wa.me/923082820224" class="block bg-green-500 text-white text-center py-3 rounded-xl font-bold shadow-sm">WhatsApp Now</a>
+                                </div>
+                            </div>`;
+                        }
                     }
                 }
-                
-                document.getElementById('listing').innerHTML = html || '<p class="text-center text-gray-500 mt-10">No properties available at the moment.</p>';
-                
+                document.getElementById('listing').innerHTML = html || '<p class="text-center text-gray-500 mt-10">No clean data found.</p>';
             } catch (error) {
-                console.error("Error fetching data:", error);
-                document.getElementById('listing').innerHTML = '<div class="text-center p-10"><p class="text-red-500 font-bold">Unable to load data.</p><button onclick="location.reload()" class="mt-4 text-indigo-600 underline">Try Refreshing</button></div>';
+                document.getElementById('listing').innerHTML = '<p class="text-center text-red-500">Error loading data.</p>';
             }
         }
-
-        // پیج لوڈ ہوتے ہی فنکشن چلائیں
         fetchProperties();
     </script>
 </body>
