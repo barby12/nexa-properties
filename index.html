@@ -27,26 +27,27 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[300px]">
-        </div>
+        <div class="text-center py-10 text-gray-400">Loading properties...</div>
+    </div>
 
     <div class="max-w-md mx-auto p-4 mb-20">
-        <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-100 text-center relative overflow-hidden">
+        <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-100 text-center">
             <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Portal</h3>
             <p class="text-gray-500 mb-6 text-sm">Automate your real estate business with Google Sheets.</p>
             
             <div class="flex flex-col gap-3 mb-6">
                 <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-dashed border-gray-300">
                     <span class="text-xs font-bold text-gray-400 uppercase">Payment Method</span>
-                    <span class="text-sm font-black text-indigo-900">JazzCash / EasyPaisa</span>
+                    <span class="text-sm font-black text-indigo-900">EasyPaisa</span>
                 </div>
                 <div class="bg-indigo-900 text-white p-4 rounded-2xl flex justify-between items-center">
                     <span class="text-xs font-medium opacity-80">Account #</span>
-                    <span class="font-mono font-bold">03082820224</span>
-                    <button onclick="copyToClipboard('03082820224')" class="text-[10px] bg-white/20 px-2 py-1 rounded-lg hover:bg-white/30">Copy</button>
+                    <span class="font-mono font-bold">03462258697</span>
+                    <button onclick="copyToClipboard('03462258697')" class="text-[10px] bg-white/20 px-2 py-1 rounded-lg hover:bg-white/30">Copy</button>
                 </div>
             </div>
             
-            <a href="https://wa.me/923082820224?text=I%20want%20to%20buy%20this%20Website%20Template" 
+            <a href="https://wa.me/923462258697?text=I%20want%20to%20buy%20this%20Website%20Template" 
                class="block bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
                 <i class="fa-brands fa-whatsapp text-xl"></i>
                 Order Template - PKR 5,000
@@ -58,6 +59,7 @@
         let allProperties = [];
 
         async function loadContent() {
+            // Updated Google Sheet Link
             const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
             
             try {
@@ -72,7 +74,7 @@
 
                 displayProperties(allProperties);
             } catch (e) {
-                console.error("Sheet error, using fallback");
+                // Fallback demo data
                 displayProperties([
                     { title: "Modern Luxury Villa", price: "PKR 4.5 Crore", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" },
                     { title: "Luxury Apartment", price: "PKR 6.5 Crore", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750" }
@@ -83,16 +85,16 @@
         function displayProperties(data) {
             const container = document.getElementById('listing');
             if (data.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-400 font-medium">No properties found matching your search.</div>`;
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 font-medium">No properties found. Check your Google Sheet data.</div>`;
                 return;
             }
             container.innerHTML = data.map(p => `
-                <div class="bg-white rounded-[2rem] shadow-md overflow-hidden border border-gray-100 transition-all hover:shadow-xl property-card">
+                <div class="bg-white rounded-[2rem] shadow-md overflow-hidden border border-gray-100 property-card">
                     <img src="${p.img || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover">
                     <div class="p-6">
                         <h2 class="text-xl font-black text-gray-800">${p.title}</h2>
                         <p class="text-indigo-600 font-black text-lg mt-1">${p.price}</p>
-                        <a href="https://wa.me/923082820224?text=Interested%20in%20${p.title}" class="mt-4 block w-full bg-slate-900 text-white text-center py-3 rounded-xl text-sm font-bold">Contact Agent</a>
+                        <a href="https://wa.me/923462258697?text=Interested%20in%20${p.title}" class="mt-4 block w-full bg-slate-900 text-white text-center py-3 rounded-xl text-sm font-bold">Contact Agent</a>
                     </div>
                 </div>
             `).join('');
@@ -106,7 +108,7 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            alert("Account number copied! Send payment screenshot after transfer.");
+            alert("EasyPaisa Number Copied! Send payment screenshot on WhatsApp after transfer.");
         }
 
         loadContent();
