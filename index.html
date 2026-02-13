@@ -27,7 +27,7 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Connecting to database...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Loading listings...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
@@ -35,10 +35,10 @@
             <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
             <p class="text-gray-500 mb-6 text-xs">Manage your properties via Google Sheets easily.</p>
             
-            <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100">
+            <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100 text-left">
                 <div class="flex justify-between items-center mb-3">
                     <span class="text-[10px] font-bold text-gray-400 uppercase">EasyPaisa Account</span>
-                    <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded">Active</span>
+                    <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded uppercase">Active</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-xl font-mono font-black text-indigo-900">03462258697</span>
@@ -58,8 +58,8 @@
         let allProperties = [];
 
         async function loadContent() {
-            // Replace this URL with your actual "Published CSV" link if it's different
-            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
+            // Your exact CSV link from the screenshot
+            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
             
             try {
                 const res = await fetch(sheetUrl);
@@ -73,7 +73,6 @@
 
                 displayProperties(allProperties);
             } catch (e) {
-                // Shows if sheet fails or is empty
                 displayProperties([]); 
             }
         }
@@ -84,7 +83,7 @@
                 container.innerHTML = `
                     <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100">
                         <p class="text-indigo-900 font-bold">No properties listed yet.</p>
-                        <p class="text-indigo-400 text-xs mt-1">Please add data to your Google Sheet.</p>
+                        <p class="text-indigo-400 text-xs mt-1 italic">Make sure your Google Sheet has data in the first 3 columns.</p>
                     </div>`;
                 return;
             }
@@ -93,7 +92,7 @@
                     <img src="${p.img || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover">
                     <div class="p-6">
                         <h2 class="text-xl font-black text-gray-800 leading-tight">${p.title}</h2>
-                        <p class="text-indigo-600 font-black text-lg mt-1">${p.price}</p>
+                        <p class="text-indigo-600 font-black text-lg mt-1 italic">${p.price}</p>
                         <div class="flex gap-2 mt-4">
                             <a href="https://wa.me/923462258697?text=Interested%20in%20${p.title}" class="flex-1 bg-slate-900 text-white text-center py-3 rounded-xl text-xs font-bold">Contact Agent</a>
                         </div>
@@ -110,7 +109,7 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            alert("Number copied! You can now pay via EasyPaisa.");
+            alert("EasyPaisa Account Copied!");
         }
 
         loadContent();
