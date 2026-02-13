@@ -8,49 +8,48 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); }
-        .search-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+        .search-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="bg-slate-50 font-sans">
 
     <div class="gradient-bg text-white pt-8 pb-16 px-6 text-center shadow-xl sticky top-0 z-50">
-        <h1 class="text-3xl font-black tracking-tighter uppercase mb-2">Nexa Real Estate</h1>
-        <p class="text-indigo-200 text-xs font-medium uppercase tracking-widest">Premium Property Solutions</p>
+        <h1 class="text-3xl font-black tracking-tighter uppercase mb-1">Nexa Real Estate</h1>
+        <p class="text-indigo-200 text-[10px] font-bold uppercase tracking-[0.2em]">Premium Property Solutions</p>
     </div>
 
     <div class="max-w-md mx-auto px-4 -mt-8 relative z-50">
         <div class="bg-white rounded-2xl p-2 search-shadow flex items-center border border-gray-100">
             <i class="fa-solid fa-magnifying-glass text-gray-400 ml-4"></i>
-            <input type="text" id="searchInput" onkeyup="filterProperties()" placeholder="Search by area or villa name..." 
+            <input type="text" id="searchInput" onkeyup="filterProperties()" placeholder="Search area or property name..." 
                    class="w-full p-4 text-sm focus:outline-none font-medium text-gray-700" />
         </div>
     </div>
 
-    <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[300px]">
-        <div class="text-center py-10 text-gray-400">Loading properties...</div>
+    <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
+        <div class="text-center py-20 text-gray-400 font-medium italic">Connecting to database...</div>
     </div>
 
-    <div class="max-w-md mx-auto p-4 mb-20">
-        <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-100 text-center">
-            <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Portal</h3>
-            <p class="text-gray-500 mb-6 text-sm">Automate your real estate business with Google Sheets.</p>
+    <div class="max-w-md mx-auto p-4 mb-24">
+        <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
+            <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
+            <p class="text-gray-500 mb-6 text-xs">Manage your properties via Google Sheets easily.</p>
             
-            <div class="flex flex-col gap-3 mb-6">
-                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-dashed border-gray-300">
-                    <span class="text-xs font-bold text-gray-400 uppercase">Payment Method</span>
-                    <span class="text-sm font-black text-indigo-900">EasyPaisa</span>
+            <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase">EasyPaisa Account</span>
+                    <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded">Active</span>
                 </div>
-                <div class="bg-indigo-900 text-white p-4 rounded-2xl flex justify-between items-center">
-                    <span class="text-xs font-medium opacity-80">Account #</span>
-                    <span class="font-mono font-bold">03462258697</span>
-                    <button onclick="copyToClipboard('03462258697')" class="text-[10px] bg-white/20 px-2 py-1 rounded-lg hover:bg-white/30">Copy</button>
+                <div class="flex justify-between items-center">
+                    <span class="text-xl font-mono font-black text-indigo-900">03462258697</span>
+                    <button onclick="copyToClipboard('03462258697')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-3 py-2 rounded-xl active:scale-95 transition">Copy</button>
                 </div>
             </div>
             
-            <a href="https://wa.me/923462258697?text=I%20want%20to%20buy%20this%20Website%20Template" 
-               class="block bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
+            <a href="https://wa.me/923462258697?text=I%20want%20to%20buy%20the%20Nexa%20Website%20Template" 
+               class="block bg-green-600 text-white font-bold py-5 rounded-2xl shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
                 <i class="fa-brands fa-whatsapp text-xl"></i>
-                Order Template - PKR 5,000
+                Buy Template - PKR 5,000
             </a>
         </div>
     </div>
@@ -59,7 +58,7 @@
         let allProperties = [];
 
         async function loadContent() {
-            // Updated Google Sheet Link
+            // Replace this URL with your actual "Published CSV" link if it's different
             const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz-wZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
             
             try {
@@ -74,27 +73,30 @@
 
                 displayProperties(allProperties);
             } catch (e) {
-                // Fallback demo data
-                displayProperties([
-                    { title: "Modern Luxury Villa", price: "PKR 4.5 Crore", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" },
-                    { title: "Luxury Apartment", price: "PKR 6.5 Crore", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750" }
-                ]);
+                // Shows if sheet fails or is empty
+                displayProperties([]); 
             }
         }
 
         function displayProperties(data) {
             const container = document.getElementById('listing');
             if (data.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-400 font-medium">No properties found. Check your Google Sheet data.</div>`;
+                container.innerHTML = `
+                    <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100">
+                        <p class="text-indigo-900 font-bold">No properties listed yet.</p>
+                        <p class="text-indigo-400 text-xs mt-1">Please add data to your Google Sheet.</p>
+                    </div>`;
                 return;
             }
             container.innerHTML = data.map(p => `
-                <div class="bg-white rounded-[2rem] shadow-md overflow-hidden border border-gray-100 property-card">
+                <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-gray-100">
                     <img src="${p.img || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover">
                     <div class="p-6">
-                        <h2 class="text-xl font-black text-gray-800">${p.title}</h2>
+                        <h2 class="text-xl font-black text-gray-800 leading-tight">${p.title}</h2>
                         <p class="text-indigo-600 font-black text-lg mt-1">${p.price}</p>
-                        <a href="https://wa.me/923462258697?text=Interested%20in%20${p.title}" class="mt-4 block w-full bg-slate-900 text-white text-center py-3 rounded-xl text-sm font-bold">Contact Agent</a>
+                        <div class="flex gap-2 mt-4">
+                            <a href="https://wa.me/923462258697?text=Interested%20in%20${p.title}" class="flex-1 bg-slate-900 text-white text-center py-3 rounded-xl text-xs font-bold">Contact Agent</a>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -108,7 +110,7 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            alert("EasyPaisa Number Copied! Send payment screenshot on WhatsApp after transfer.");
+            alert("Number copied! You can now pay via EasyPaisa.");
         }
 
         loadContent();
