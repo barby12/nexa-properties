@@ -27,13 +27,13 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Synchronizing with Google Sheets...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Loading your properties...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
         <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
             <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
-            <p class="text-gray-500 mb-6 text-xs text-center">Manage your properties via Google Sheets easily.</p>
+            <p class="text-gray-500 mb-6 text-xs">Manage your properties via Google Sheets easily.</p>
             
             <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100 text-left">
                 <div class="flex justify-between items-center mb-3">
@@ -58,37 +58,36 @@
         let allProperties = [];
 
         async function loadContent() {
-            // Updated to the most direct CSV access possible
-            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?output=csv&t=" + Date.now();
+            // This is the direct query link that bypasses the "Publish to Web" errors
+            const sheetId = "1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru";
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-${sheetId}/pub?output=csv&gid=0&single=true&t=${Date.now()}`;
             
             try {
                 const res = await fetch(sheetUrl);
                 const csvText = await res.text();
                 
-                // FORCE CLEAN: Removes Google's hidden "function" code
-                const lines = csvText.split(/\r?\n/);
-                const dataLines = lines.filter(line => 
-                    line.trim() !== "" && 
-                    !line.includes("function") && 
-                    !line.includes("globalThis") &&
-                    line.split(',').length >= 2
+                // Final Brute Force: Filter out ANY line that isn't property data
+                const rows = csvText.split(/\r?\n/).filter(row => 
+                    row.length > 10 && 
+                    !row.includes('function') && 
+                    !row.includes('globalThis')
                 );
 
-                // Skip the header row if it exists
-                const finalRows = dataLines[0].toLowerCase().includes("title") ? dataLines.slice(1) : dataLines;
+                // If the first row is just "Title, Price...", skip it
+                const dataRows = (rows[0] && rows[0].toLowerCase().includes('title')) ? rows.slice(1) : rows;
 
-                allProperties = finalRows.map(row => {
+                allProperties = dataRows.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
                     return { 
-                        title: cols[0] || "Untitled Property", 
-                        price: cols[1] || "Contact for Price", 
+                        title: cols[0] || "Property", 
+                        price: cols[1] || "Contact Us", 
                         img: cols[2] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" 
                     };
                 });
 
                 displayProperties(allProperties);
             } catch (e) {
-                console.error(e);
+                console.error("Connection failed", e);
                 displayProperties([]); 
             }
         }
@@ -99,7 +98,7 @@
                 container.innerHTML = `
                     <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100 mx-4">
                         <p class="text-indigo-900 font-bold">Connecting to Sheet1...</p>
-                        <p class="text-indigo-400 text-xs mt-1 italic">Refreshing data from Google.</p>
+                        <p class="text-indigo-400 text-xs mt-1 italic">Please refresh in 1 minute.</p>
                     </div>`;
                 return;
             }
