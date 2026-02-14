@@ -27,7 +27,7 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Loading listings...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Connecting to database...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
@@ -58,18 +58,22 @@
         let allProperties = [];
 
         async function loadContent() {
-            // Your exact CSV link from the screenshot
+            // Your exact CSV link verified from screenshots
             const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
             
             try {
                 const res = await fetch(sheetUrl);
                 const csv = await res.text();
-                const rows = csv.split(/\r?\n/).slice(1);
                 
-                allProperties = rows.map(row => {
+                // DATA CLEANING: Skips the "function n(a)" security header from Google
+                const rows = csv.split(/\r?\n/);
+                const startIdx = rows.findIndex(row => row.toLowerCase().includes('title')) + 1;
+                const cleanRows = (startIdx > 0) ? rows.slice(startIdx) : rows.slice(1);
+                
+                allProperties = cleanRows.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
                     return { title: cols[0], price: cols[1], img: cols[2] };
-                }).filter(p => p.title && p.title.length > 1);
+                }).filter(p => p.title && p.title.length > 2 && !p.title.includes('function'));
 
                 displayProperties(allProperties);
             } catch (e) {
@@ -83,13 +87,13 @@
                 container.innerHTML = `
                     <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100">
                         <p class="text-indigo-900 font-bold">No properties listed yet.</p>
-                        <p class="text-indigo-400 text-xs mt-1 italic">Make sure your Google Sheet has data in the first 3 columns.</p>
+                        <p class="text-indigo-400 text-xs mt-1 italic">Make sure your Google Sheet "Sheet1" has data.</p>
                     </div>`;
                 return;
             }
             container.innerHTML = data.map(p => `
                 <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-gray-100">
-                    <img src="${p.img || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover">
+                    <img src="${p.img || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
                     <div class="p-6">
                         <h2 class="text-xl font-black text-gray-800 leading-tight">${p.title}</h2>
                         <p class="text-indigo-600 font-black text-lg mt-1 italic">${p.price}</p>
