@@ -27,13 +27,13 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Updating listings...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Synchronizing with Google Sheets...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
         <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
             <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
-            <p class="text-gray-500 mb-6 text-xs">Manage your properties via Google Sheets easily.</p>
+            <p class="text-gray-500 mb-6 text-xs text-center">Manage your properties via Google Sheets easily.</p>
             
             <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100 text-left">
                 <div class="flex justify-between items-center mb-3">
@@ -58,25 +58,37 @@
         let allProperties = [];
 
         async function loadContent() {
-            // Updated link to bypass Google security header
-            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&cache_bust=" + Date.now();
+            // Updated to the most direct CSV access possible
+            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?output=csv&t=" + Date.now();
             
             try {
                 const res = await fetch(sheetUrl);
-                const csv = await res.text();
+                const csvText = await res.text();
                 
-                // DATA CLEANING: This skips everything until it finds your "Title" column
-                const rows = csv.split(/\r?\n/);
-                const startIdx = rows.findIndex(row => row.toLowerCase().includes('title'));
-                const realData = (startIdx !== -1) ? rows.slice(startIdx + 1) : rows.slice(1);
-                
-                allProperties = realData.map(row => {
+                // FORCE CLEAN: Removes Google's hidden "function" code
+                const lines = csvText.split(/\r?\n/);
+                const dataLines = lines.filter(line => 
+                    line.trim() !== "" && 
+                    !line.includes("function") && 
+                    !line.includes("globalThis") &&
+                    line.split(',').length >= 2
+                );
+
+                // Skip the header row if it exists
+                const finalRows = dataLines[0].toLowerCase().includes("title") ? dataLines.slice(1) : dataLines;
+
+                allProperties = finalRows.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
-                    return { title: cols[0], price: cols[1], img: cols[2] };
-                }).filter(p => p.title && p.title.length > 2 && !p.title.includes('function'));
+                    return { 
+                        title: cols[0] || "Untitled Property", 
+                        price: cols[1] || "Contact for Price", 
+                        img: cols[2] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" 
+                    };
+                });
 
                 displayProperties(allProperties);
             } catch (e) {
+                console.error(e);
                 displayProperties([]); 
             }
         }
@@ -85,15 +97,15 @@
             const container = document.getElementById('listing');
             if (data.length === 0) {
                 container.innerHTML = `
-                    <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100">
-                        <p class="text-indigo-900 font-bold">No properties listed yet.</p>
-                        <p class="text-indigo-400 text-xs mt-1 italic">Check your Google Sheet "Sheet1" data columns.</p>
+                    <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100 mx-4">
+                        <p class="text-indigo-900 font-bold">Connecting to Sheet1...</p>
+                        <p class="text-indigo-400 text-xs mt-1 italic">Refreshing data from Google.</p>
                     </div>`;
                 return;
             }
             container.innerHTML = data.map(p => `
                 <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-gray-100">
-                    <img src="${p.img || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
+                    <img src="${p.img}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
                     <div class="p-6">
                         <h2 class="text-xl font-black text-gray-800 leading-tight">${p.title}</h2>
                         <p class="text-indigo-600 font-black text-lg mt-1 italic">${p.price}</p>
@@ -113,7 +125,7 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            alert("EasyPaisa Number Copied!");
+            alert("EasyPaisa Account Copied!");
         }
 
         loadContent();
