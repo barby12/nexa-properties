@@ -27,13 +27,13 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Loading your properties...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Loading Properties...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
         <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
             <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
-            <p class="text-gray-500 mb-6 text-xs">Manage your properties via Google Sheets easily.</p>
+            <p class="text-gray-500 mb-6 text-xs text-center">Manage your properties via Google Sheets easily.</p>
             
             <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100 text-left">
                 <div class="flex justify-between items-center mb-3">
@@ -58,36 +58,29 @@
         let allProperties = [];
 
         async function loadContent() {
-            // This is the direct query link that bypasses the "Publish to Web" errors
+            // Using the GViz API to bypass Google's "Published" security scramble
             const sheetId = "1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru";
-            const sheetUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-${sheetId}/pub?output=csv&gid=0&single=true&t=${Date.now()}`;
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
             
             try {
                 const res = await fetch(sheetUrl);
                 const csvText = await res.text();
                 
-                // Final Brute Force: Filter out ANY line that isn't property data
-                const rows = csvText.split(/\r?\n/).filter(row => 
-                    row.length > 10 && 
-                    !row.includes('function') && 
-                    !row.includes('globalThis')
-                );
+                // Parse CSV rows
+                const rows = csvText.split(/\r?\n/).slice(1); // Skips the header row (Title, Price, etc)
 
-                // If the first row is just "Title, Price...", skip it
-                const dataRows = (rows[0] && rows[0].toLowerCase().includes('title')) ? rows.slice(1) : rows;
-
-                allProperties = dataRows.map(row => {
+                allProperties = rows.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
                     return { 
                         title: cols[0] || "Property", 
-                        price: cols[1] || "Contact Us", 
+                        price: cols[1] || "Contact for Price", 
                         img: cols[2] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" 
                     };
-                });
+                }).filter(p => p.title !== "Property"); // Only keep rows with real names
 
                 displayProperties(allProperties);
             } catch (e) {
-                console.error("Connection failed", e);
+                console.error(e);
                 displayProperties([]); 
             }
         }
@@ -97,8 +90,8 @@
             if (data.length === 0) {
                 container.innerHTML = `
                     <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100 mx-4">
-                        <p class="text-indigo-900 font-bold">Connecting to Sheet1...</p>
-                        <p class="text-indigo-400 text-xs mt-1 italic">Please refresh in 1 minute.</p>
+                        <p class="text-indigo-900 font-bold italic">No Properties Found</p>
+                        <p class="text-indigo-400 text-xs mt-1">Check that "Sheet1" is shared as "Anyone with link".</p>
                     </div>`;
                 return;
             }
