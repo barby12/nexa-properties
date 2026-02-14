@@ -27,13 +27,13 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Loading listings...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Updating listings...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
         <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
             <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
-            <p class="text-gray-500 mb-6 text-xs text-center">Manage your properties via Google Sheets easily.</p>
+            <p class="text-gray-500 mb-6 text-xs">Manage your properties via Google Sheets easily.</p>
             
             <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100 text-left">
                 <div class="flex justify-between items-center mb-3">
@@ -58,19 +58,19 @@
         let allProperties = [];
 
         async function loadContent() {
-            // Exact CSV link from your screenshot
-            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
+            // Updated link to bypass Google security header
+            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&cache_bust=" + Date.now();
             
             try {
                 const res = await fetch(sheetUrl);
                 const csv = await res.text();
                 
-                // Smart Cleaning: Skips the hidden "function n(a)" code automatically
+                // DATA CLEANING: This skips everything until it finds your "Title" column
                 const rows = csv.split(/\r?\n/);
-                const startIdx = rows.findIndex(row => row.toLowerCase().includes('title')) + 1;
-                const cleanRows = (startIdx > 0) ? rows.slice(startIdx) : rows.slice(1);
+                const startIdx = rows.findIndex(row => row.toLowerCase().includes('title'));
+                const realData = (startIdx !== -1) ? rows.slice(startIdx + 1) : rows.slice(1);
                 
-                allProperties = cleanRows.map(row => {
+                allProperties = realData.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
                     return { title: cols[0], price: cols[1], img: cols[2] };
                 }).filter(p => p.title && p.title.length > 2 && !p.title.includes('function'));
@@ -87,7 +87,7 @@
                 container.innerHTML = `
                     <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100">
                         <p class="text-indigo-900 font-bold">No properties listed yet.</p>
-                        <p class="text-indigo-400 text-xs mt-1 italic">Make sure your Google Sheet "Sheet1" has data.</p>
+                        <p class="text-indigo-400 text-xs mt-1 italic">Check your Google Sheet "Sheet1" data columns.</p>
                     </div>`;
                 return;
             }
@@ -113,7 +113,7 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text);
-            alert("EasyPaisa Account Copied!");
+            alert("EasyPaisa Number Copied!");
         }
 
         loadContent();
