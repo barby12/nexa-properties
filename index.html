@@ -8,118 +8,77 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); }
-        .search-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="bg-slate-50 font-sans">
 
     <div class="gradient-bg text-white pt-8 pb-16 px-6 text-center shadow-xl sticky top-0 z-50">
-        <h1 class="text-3xl font-black tracking-tighter uppercase mb-1">Nexa Real Estate</h1>
+        <h1 class="text-3xl font-black uppercase mb-1">Nexa Real Estate</h1>
         <p class="text-indigo-200 text-[10px] font-bold uppercase tracking-[0.2em]">Premium Property Solutions</p>
     </div>
 
-    <div class="max-w-md mx-auto px-4 -mt-8 relative z-50">
-        <div class="bg-white rounded-2xl p-2 search-shadow flex items-center border border-gray-100">
-            <i class="fa-solid fa-magnifying-glass text-gray-400 ml-4"></i>
-            <input type="text" id="searchInput" onkeyup="filterProperties()" placeholder="Search area or property name..." 
-                   class="w-full p-4 text-sm focus:outline-none font-medium text-gray-700" />
-        </div>
-    </div>
-
-    <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Loading Properties...</div>
+    <div id="listing" class="max-w-md mx-auto p-4 space-y-6 -mt-8 relative z-50">
+        <div class="text-center py-20 text-gray-400 font-medium italic">Finalizing connection...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
         <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
-            <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
-            <p class="text-gray-500 mb-6 text-xs text-center">Manage your properties via Google Sheets easily.</p>
-            
+            <h3 class="text-2xl font-black text-gray-900 mb-2">EasyPaisa Payment</h3>
             <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100 text-left">
                 <div class="flex justify-between items-center mb-3">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase">EasyPaisa Account</span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase">Account Number</span>
                     <span class="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded uppercase">Active</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-xl font-mono font-black text-indigo-900">03462258697</span>
-                    <button onclick="copyToClipboard('03462258697')" class="text-indigo-600 font-bold text-xs bg-indigo-50 px-3 py-2 rounded-xl active:scale-95 transition">Copy</button>
                 </div>
             </div>
-            
-            <a href="https://wa.me/923462258697?text=I%20want%20to%20buy%20the%20Nexa%20Website%20Template" 
-               class="block bg-green-600 text-white font-bold py-5 rounded-2xl shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
-                <i class="fa-brands fa-whatsapp text-xl"></i>
-                Buy Template - PKR 5,000
-            </a>
+            <a href="https://wa.me/923462258697?text=Interested%20in%20Template" class="block bg-green-600 text-white font-bold py-5 rounded-2xl">Contact on WhatsApp</a>
         </div>
     </div>
 
     <script>
-        let allProperties = [];
-
         async function loadContent() {
-            // Using the GViz API to bypass Google's "Published" security scramble
-            const sheetId = "1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru";
-            const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+            // Force clean data pull
+            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?output=csv&gid=0";
             
             try {
-                const res = await fetch(sheetUrl);
+                const res = await fetch(sheetUrl + "&t=" + Date.now());
                 const csvText = await res.text();
                 
-                // Parse CSV rows
-                const rows = csvText.split(/\r?\n/).slice(1); // Skips the header row (Title, Price, etc)
+                // THE CLEANER: This ignores everything that isn't real property data
+                const rows = csvText.split(/\r?\n/).filter(line => 
+                    line.trim() !== "" && 
+                    !line.includes("function") && 
+                    !line.includes("globalThis") &&
+                    line.includes(",") // Must have a comma to be a real data row
+                );
 
-                allProperties = rows.map(row => {
+                // Skip the header row (Title, Price, etc.)
+                const dataRows = rows.slice(1);
+
+                const container = document.getElementById('listing');
+                if (dataRows.length === 0) {
+                    container.innerHTML = `<div class="bg-white p-8 rounded-3xl text-center">Syncing with Sheet1... Refresh in 10 seconds.</div>`;
+                    return;
+                }
+
+                container.innerHTML = dataRows.map(row => {
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
-                    return { 
-                        title: cols[0] || "Property", 
-                        price: cols[1] || "Contact for Price", 
-                        img: cols[2] || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" 
-                    };
-                }).filter(p => p.title !== "Property"); // Only keep rows with real names
-
-                displayProperties(allProperties);
+                    return `
+                        <div class="bg-white rounded-[2rem] shadow-lg overflow-hidden border border-gray-100">
+                            <img src="${cols[2] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover">
+                            <div class="p-6">
+                                <h2 class="text-xl font-black text-gray-800">${cols[0]}</h2>
+                                <p class="text-indigo-600 font-black text-lg mt-1 italic">${cols[1]}</p>
+                                <a href="https://wa.me/923462258697?text=Interested%20in%20${cols[0]}" class="block mt-4 bg-slate-900 text-white text-center py-3 rounded-xl text-xs font-bold">Contact Agent</a>
+                            </div>
+                        </div>`;
+                }).join('');
             } catch (e) {
-                console.error(e);
-                displayProperties([]); 
+                document.getElementById('listing').innerHTML = "Connection Error. Check Google Sheet Share settings.";
             }
         }
-
-        function displayProperties(data) {
-            const container = document.getElementById('listing');
-            if (data.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-indigo-50 rounded-3xl p-8 text-center border border-indigo-100 mx-4">
-                        <p class="text-indigo-900 font-bold italic">No Properties Found</p>
-                        <p class="text-indigo-400 text-xs mt-1">Check that "Sheet1" is shared as "Anyone with link".</p>
-                    </div>`;
-                return;
-            }
-            container.innerHTML = data.map(p => `
-                <div class="bg-white rounded-[2rem] shadow-sm overflow-hidden border border-gray-100">
-                    <img src="${p.img}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
-                    <div class="p-6">
-                        <h2 class="text-xl font-black text-gray-800 leading-tight">${p.title}</h2>
-                        <p class="text-indigo-600 font-black text-lg mt-1 italic">${p.price}</p>
-                        <div class="flex gap-2 mt-4">
-                            <a href="https://wa.me/923462258697?text=Interested%20in%20${p.title}" class="flex-1 bg-slate-900 text-white text-center py-3 rounded-xl text-xs font-bold">Contact Agent</a>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function filterProperties() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProperties.filter(p => p.title.toLowerCase().includes(term));
-            displayProperties(filtered);
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            alert("EasyPaisa Account Copied!");
-        }
-
         loadContent();
     </script>
 </body>
