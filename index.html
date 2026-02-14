@@ -27,13 +27,13 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 mt-4 min-h-[200px]">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Connecting to database...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Loading listings...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
         <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
             <h3 class="text-2xl font-black text-gray-900 mb-2">Own This Website</h3>
-            <p class="text-gray-500 mb-6 text-xs">Manage your properties via Google Sheets easily.</p>
+            <p class="text-gray-500 mb-6 text-xs text-center">Manage your properties via Google Sheets easily.</p>
             
             <div class="bg-slate-50 p-5 rounded-3xl mb-6 border border-gray-100 text-left">
                 <div class="flex justify-between items-center mb-3">
@@ -58,14 +58,14 @@
         let allProperties = [];
 
         async function loadContent() {
-            // Your exact CSV link verified from screenshots
+            // Exact CSV link from your screenshot
             const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?gid=0&single=true&output=csv&t=" + Date.now();
             
             try {
                 const res = await fetch(sheetUrl);
                 const csv = await res.text();
                 
-                // DATA CLEANING: Skips the "function n(a)" security header from Google
+                // Smart Cleaning: Skips the hidden "function n(a)" code automatically
                 const rows = csv.split(/\r?\n/);
                 const startIdx = rows.findIndex(row => row.toLowerCase().includes('title')) + 1;
                 const cleanRows = (startIdx > 0) ? rows.slice(startIdx) : rows.slice(1);
