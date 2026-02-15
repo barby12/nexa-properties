@@ -3,54 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexa Real Estate</title>
+    <title>Nexa Real Estate | Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); }
+    </style>
 </head>
 <body class="bg-slate-50 pb-20">
 
-    <div class="bg-indigo-900 text-white p-8 text-center shadow-lg">
-        <h1 class="text-3xl font-bold uppercase">Nexa Real Estate</h1>
-        <p class="text-indigo-200 text-xs mt-2">Premium Property Solutions</p>
+    <div class="gradient-bg text-white p-8 text-center shadow-lg">
+        <h1 class="text-3xl font-black uppercase tracking-wider">Nexa Real Estate</h1>
+        <p class="text-indigo-200 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Premium Property Solutions</p>
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 -mt-6">
-        
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" class="w-full h-52 object-cover">
-            <div class="p-6">
-                <h2 class="text-xl font-bold text-gray-800">Modern Luxury Villa</h2>
-                <p class="text-indigo-600 font-bold text-lg mt-1 italic">PKR 4.5 crore</p>
-                <a href="https://wa.me/923462258697?text=Interested in Luxury Villa" class="block mt-4 bg-slate-900 text-white text-center py-4 rounded-2xl font-bold">Contact Agent</a>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750" class="w-full h-52 object-cover">
-            <div class="p-6">
-                <h2 class="text-xl font-bold text-gray-800">Premium Apartment</h2>
-                <p class="text-indigo-600 font-bold text-lg mt-1 italic">PKR 6.5 crore</p>
-                <a href="https://wa.me/923462258697?text=Interested in Apartment" class="block mt-4 bg-slate-900 text-white text-center py-4 rounded-2xl font-bold">Contact Agent</a>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-            <img src="https://images.unsplash.com/photo-1580587767303-93663673c6b2" class="w-full h-52 object-cover">
-            <div class="p-6">
-                <h2 class="text-xl font-bold text-gray-800">Classic Bungalow</h2>
-                <p class="text-indigo-600 font-bold text-lg mt-1 italic">PKR 3.5 crore</p>
-                <a href="https://wa.me/923462258697?text=Interested in Bungalow" class="block mt-4 bg-slate-900 text-white text-center py-4 rounded-2xl font-bold">Contact Agent</a>
-            </div>
-        </div>
-
+        <div class="text-center py-10 text-gray-400 italic">Updating listings...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mt-10">
         <div class="bg-white rounded-[2.5rem] p-8 shadow-2xl border-2 border-indigo-50 text-center">
             <h3 class="text-xl font-bold text-gray-900 mb-2">Get This Template</h3>
-            <div class="bg-slate-50 p-6 rounded-3xl mb-6 border border-gray-100 text-left">
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">EasyPaisa Account</p>
-                <p class="text-2xl font-mono font-black text-indigo-900">03462258697</p>
+            <p class="text-gray-500 text-sm mb-6">Own this professional portal today.</p>
+            
+            <div class="bg-slate-50 p-6 rounded-3xl mb-6 border border-gray-100">
+                <p class="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">EasyPaisa Account</p>
+                <p class="text-2xl font-mono font-black text-indigo-900 text-left">03462258697</p>
             </div>
+            
             <a href="https://wa.me/923462258697?text=I%20want%20to%20buy%20the%20Nexa%20Template%20for%20PKR%205000" 
                class="block bg-green-600 text-white font-bold py-5 rounded-2xl shadow-lg">
                 Buy Template - PKR 5,000
@@ -58,5 +37,45 @@
         </div>
     </div>
 
+    <script>
+        async function loadContent() {
+            const sheetId = "1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfc";
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
+            
+            try {
+                const res = await fetch(sheetUrl);
+                const csvText = await res.text();
+                
+                // Filters out Google's security junk automatically
+                const rows = csvText.split(/\r?\n/).filter(line => line.includes(",") && !line.includes("function"));
+                const dataRows = rows.slice(1); 
+
+                const container = document.getElementById('listing');
+                
+                container.innerHTML = dataRows.map(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
+                    
+                    // SMART IMAGE PICKER: If Column C is broken or short, use a backup high-quality house photo
+                    let finalImg = cols[2];
+                    if (!finalImg || finalImg.length < 15 || finalImg.includes("creditShareLink")) {
+                        finalImg = "https://images.unsplash.com/photo-1580587767303-93663673c6b2?q=80&w=800";
+                    }
+
+                    return `
+                        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                            <img src="${finalImg}" class="w-full h-52 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
+                            <div class="p-6">
+                                <h2 class="text-xl font-bold text-gray-800">${cols[0]}</h2>
+                                <p class="text-indigo-600 font-bold text-lg mt-1 italic">${cols[1] || 'Contact for Price'}</p>
+                                <a href="https://wa.me/923462258697?text=Interested in ${cols[0]}" class="block mt-4 bg-slate-900 text-white text-center py-4 rounded-2xl font-bold">Contact Agent</a>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (e) {
+                console.log("Sync error");
+            }
+        }
+        loadContent();
+    </script>
 </body>
 </html>
