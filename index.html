@@ -18,7 +18,7 @@
     </div>
 
     <div id="listing" class="max-w-md mx-auto p-4 space-y-6 -mt-8 relative z-50">
-        <div class="text-center py-20 text-gray-400 font-medium italic">Finalizing connection...</div>
+        <div class="text-center py-20 text-gray-400 font-medium italic">Connecting to Database...</div>
     </div>
 
     <div class="max-w-md mx-auto p-4 mb-24">
@@ -33,33 +33,32 @@
                     <span class="text-xl font-mono font-black text-indigo-900">03462258697</span>
                 </div>
             </div>
-            <a href="https://wa.me/923462258697?text=Interested%20in%20Template" class="block bg-green-600 text-white font-bold py-5 rounded-2xl">Contact on WhatsApp</a>
+            <a href="https://wa.me/923462258697?text=I%20want%20to%20buy%20this%20portal" class="block bg-green-600 text-white font-bold py-5 rounded-2xl shadow-lg">Contact on WhatsApp</a>
         </div>
     </div>
 
     <script>
         async function loadContent() {
-            // Force clean data pull
-            const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfcQMpbpz6aYNwZwzpqhULy-nQaa9o8GkkQ0oru/pub?output=csv&gid=0";
+            // This is the Direct ID link - it ignores the "Publish" glitch
+            const sheetId = "1vTiTlwmvj4cU4KPZnGm1_gLCilx2b1t_OlM3poXdQfc";
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`;
             
             try {
-                const res = await fetch(sheetUrl + "&t=" + Date.now());
+                const res = await fetch(sheetUrl);
                 const csvText = await res.text();
                 
-                // THE CLEANER: This ignores everything that isn't real property data
+                // Pure data cleaner: filters out any non-property lines
                 const rows = csvText.split(/\r?\n/).filter(line => 
-                    line.trim() !== "" && 
+                    line.includes(",") && 
                     !line.includes("function") && 
-                    !line.includes("globalThis") &&
-                    line.includes(",") // Must have a comma to be a real data row
+                    line.length > 5
                 );
 
-                // Skip the header row (Title, Price, etc.)
-                const dataRows = rows.slice(1);
-
+                const dataRows = rows.slice(1); // Skip the Title/Price header
                 const container = document.getElementById('listing');
+
                 if (dataRows.length === 0) {
-                    container.innerHTML = `<div class="bg-white p-8 rounded-3xl text-center">Syncing with Sheet1... Refresh in 10 seconds.</div>`;
+                    container.innerHTML = `<div class="bg-white p-8 rounded-3xl text-center">Syncing Properties... Refresh in 10s.</div>`;
                     return;
                 }
 
@@ -67,7 +66,7 @@
                     const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g, "").trim());
                     return `
                         <div class="bg-white rounded-[2rem] shadow-lg overflow-hidden border border-gray-100">
-                            <img src="${cols[2] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c'}" class="w-full h-56 object-cover">
+                            <img src="${cols[2]}" class="w-full h-56 object-cover" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c'">
                             <div class="p-6">
                                 <h2 class="text-xl font-black text-gray-800">${cols[0]}</h2>
                                 <p class="text-indigo-600 font-black text-lg mt-1 italic">${cols[1]}</p>
@@ -76,7 +75,7 @@
                         </div>`;
                 }).join('');
             } catch (e) {
-                document.getElementById('listing').innerHTML = "Connection Error. Check Google Sheet Share settings.";
+                document.getElementById('listing').innerHTML = "Database Connection Error.";
             }
         }
         loadContent();
